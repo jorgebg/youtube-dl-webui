@@ -1,13 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import glob
 import json
+import os
 
 from flask import Flask
 from flask import render_template
 from flask import request
+from flask import send_file
 from multiprocessing import Process
 from copy import deepcopy
+
+
+DOWNLOAD_DIR = None
+
+
+def find_filename(tid):
+    pattern = DOWNLOAD_DIR + '/' + tid + '.*'
+    filename_list = glob.glob(pattern)
+    filename = filename_list[0]
+    return filename
+
 
 MSG = None
 
@@ -112,6 +126,28 @@ def get_config():
     return json.dumps(MSG.get())
 
 
+@app.route('/task/tid/<tid>/play', methods=['GET'])
+def playFile(tid):
+    filename = find_filename(tid)
+    return send_file(filename)
+
+
+@app.route('/task/tid/<tid>/download', methods=['GET'])
+def downloadFile(tid):
+    payload = {
+        'tid': tid,
+        'exerpt': False,
+    }
+    MSG.put('query', payload)
+    msg = MSG.get()
+    filename = find_filename(tid)
+    extension = os.path.splitext(filename)[-1]
+    attachment_filename = msg['detail']['title'] + extension
+    return send_file(
+        filename, as_attachment=True, attachment_filename=attachment_filename
+    )
+
+
 ###
 # test cases
 ###
@@ -121,17 +157,20 @@ def test(case):
 
 
 class Server(Process):
-    def __init__(self, msg_cli, host, port):
+    def __init__(self, msg_cli, host, port, download_dir):
         super(Server, self).__init__()
 
         self.msg_cli = msg_cli
 
         self.host = host
         self.port = port
+        self.download_dir = download_dir
 
     def run(self):
         global MSG
         MSG = self.msg_cli
+        global DOWNLOAD_DIR
+        DOWNLOAD_DIR = self.download_dir
         app.run(host=self.host, port=int(self.port), use_reloader=False)
 
 

@@ -193,7 +193,7 @@ var videoDownload = (function (Vue, extendAM){
                 },
                 etaConv: function(state, value) {
                     if (state == 'paused' || state == 'invalid' || state == 'finished')
-                        return 'NaN';
+                        return '';
                     return this.secondsToHuman(value);
                 },
                 progressConv: function(state, value) {
@@ -237,6 +237,12 @@ var videoDownload = (function (Vue, extendAM){
                         return {'icon': 'fa-check-circle-o', 'color': 'grey'};
                     else
                         return {'icon': 'fa-times-circle-o', 'color': 'red'};
+                },
+                playUrl: function(tid) {
+                    return this.headPath + 'task/tid/' +  tid + '/play'
+                },
+                downloadUrl: function(tid) {
+                    return this.headPath + 'task/tid/' +  tid + '/download'
                 },
                 tsToLocal: function(timeStamp) {
                     if (typeof timeStamp == 'undefined' || Number(timeStamp) < 10)

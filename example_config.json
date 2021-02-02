@@ -7,9 +7,5 @@
     "server": {
         "host": "0.0.0.0",
         "port": 5000
-    },
-    "youtube_dl": {
-        "format": "bestaudio/best",
-        "proxy": "socks5://127.0.0.1:1080"
     }
 }
